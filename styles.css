@@ -256,6 +256,12 @@ button:focus-visible {
   display: block;
 }
 
+.item small {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
 .item span {
   color: var(--muted);
   font-size: 0.9rem;
@@ -265,6 +271,27 @@ button:focus-visible {
   background: #f4e3dd;
   color: var(--coral);
   padding: 0.55rem 0.7rem;
+}
+
+.registry-item {
+  align-items: start;
+}
+
+.registry-item div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.split-total {
+  background: #f9fbf8;
+}
+
+.split-total.is-valid {
+  border-color: #b8d8c2;
+}
+
+.split-total.is-invalid {
+  border-color: #e5b7aa;
 }
 
 .campaigns {

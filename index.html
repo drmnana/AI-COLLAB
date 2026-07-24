@@ -115,8 +115,8 @@
         <article class="panel">
           <div class="section-heading compact">
             <div>
-              <p class="eyebrow">Catalog planner</p>
-              <h2>Package songs for higher-value uses.</h2>
+              <p class="eyebrow">Rights registry</p>
+              <h2>Define the song data every license will use.</h2>
             </div>
           </div>
           <form id="catalogForm" class="stacked-form">
@@ -125,19 +125,51 @@
               <input id="songTitle" required placeholder="Midnight Signal">
             </label>
             <label>
+              Artist / project
+              <input id="songArtist" required placeholder="Nova Wells">
+            </label>
+            <label>
+              ISRC / catalog ID
+              <input id="songIsrc" placeholder="QZ-ABC-26-00123">
+            </label>
+            <label>
+              Master owner
+              <input id="masterOwner" required placeholder="Nova Wells LLC">
+            </label>
+            <label>
+              Composition owner
+              <input id="compositionOwner" required placeholder="Nova Wells Publishing">
+            </label>
+            <label>
               Best market
               <select id="songMarket">
                 <option>AI training opt-in license</option>
+                <option>AI generation / soundtrack-on-demand</option>
+                <option>AI exclusion / no-training declaration</option>
                 <option>Podcast intro/outro</option>
                 <option>Indie game loop</option>
+                <option>Local business / fitness / event public use</option>
                 <option>Fitness studio playlist</option>
                 <option>Short-form creator pack</option>
                 <option>Brand campaign sync</option>
+                <option>Remix / stem-use license</option>
               </select>
             </label>
             <label>
               Target price
               <input id="songPrice" type="number" min="0" step="25" value="350">
+            </label>
+            <label>
+              AI policy
+              <select id="aiPolicy">
+                <option value="opt-in-priced">Opt-in with priced license</option>
+                <option value="no-training">No AI training or generation</option>
+                <option value="manual-approval">Manual approval required</option>
+              </select>
+            </label>
+            <label>
+              Blocked uses
+              <input id="blockedUses" placeholder="political ads, adult content">
             </label>
             <button type="submit">Add Song</button>
           </form>

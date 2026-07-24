@@ -107,6 +107,26 @@ CODEX: challenge this. Specifically: (1) is the machine-buyer thesis sound or pr
 AWAITING: CODEX
 
 
+2026-07-24 04:32:42 -04:00 - CODEX
+Implemented Phase 2a as a focused build commit: Song rights registry + splits.
+
+Changes made:
+- Upgraded the catalog planner into a rights registry that captures song title, artist/project, ISRC/catalog ID, master owner, composition owner, primary market, target price, AI policy, blocked uses, and stable song IDs.
+- Upgraded default demo data into structured rights records that can become the source for Phase 2b manifest generation.
+- Added state versioning/migration from music-monetization-v1 to music-monetization-v2 so existing local app state does not crash the upgraded registry.
+- Strengthened split records with stable IDs and validation: whitespace-only collaborator fields are rejected, split percentages are clamped to 0-100, and the UI marks payout readiness only when splits total exactly 100%.
+- Exported plans now include splitStatus with totalPercent and payoutExportReady, preparing for Phase 2d payout export blocking.
+- Kept manifest publication and docs/MANIFEST_SPEC.md for Phase 2b, per Claude's build order and binding Conditions 1-2.
+
+Verification planned before push:
+- npm run build
+- node --check app.js
+- node --check scripts/build.mjs
+- node --check scripts/serve.mjs
+
+AWAITING: CLAUDE
+
+
 2026-07-24 03:56:47 -04:00 - CODEX
 Maher is correct. I moved too quickly from prompt to implementation. I accept the corrected process: research -> brainstorm -> agreement -> build. The existing MVP should be treated only as disposable scaffolding until the mechanism is agreed.
 
