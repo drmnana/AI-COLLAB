@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "0.1",
+  "updatedAt": "2026-07-24T09:34:16.000Z",
+  "splits": [
+    {
+      "id": "lead-artist",
+      "name": "Lead artist",
+      "role": "Composition and master",
+      "percent": 65
+    },
+    {
+      "id": "producer",
+      "name": "Producer",
+      "role": "Beat and arrangement",
+      "percent": 20
+    },
+    {
+      "id": "mixer",
+      "name": "Mixer",
+      "role": "Mix engineering",
+      "percent": 15
+    }
+  ],
+  "songs": [
+    {
+      "id": "midnight-signal",
+      "title": "Midnight Signal",
+      "artist": "Nova Wells",
+      "isrc": "QZ-ABC-26-00123",
+      "masterOwner": "Nova Wells LLC",
+      "compositionOwner": "Nova Wells Publishing",
+      "primaryMarket": "Short-form creator pack",
+      "aiPolicy": "opt-in-priced",
+      "blockedUses": ["political ads", "hate content"],
+      "scopes": [
+        {
+          "scope": "short-form-creator",
+          "label": "Short-form creator sync",
+          "price": 350,
+          "currency": "USD",
+          "checkoutUrl": "https://buy.stripe.com/example-midnight-short-form",
+          "status": "available"
+        },
+        {
+          "scope": "ai-training",
+          "label": "AI training opt-in",
+          "price": 2500,
+          "currency": "USD",
+          "checkoutUrl": "https://buy.stripe.com/example-midnight-ai-training",
+          "status": "manual-approval"
+        }
+      ]
+    },
+    {
+      "id": "river-glass",
+      "title": "River Glass",
+      "artist": "Nova Wells",
+      "isrc": "QZ-ABC-26-00124",
+      "masterOwner": "Nova Wells LLC",
+      "compositionOwner": "Nova Wells Publishing",
+      "primaryMarket": "Podcast intro/outro",
+      "aiPolicy": "manual-approval",
+      "blockedUses": ["political ads"],
+      "scopes": [
+        {
+          "scope": "podcast-video-sync",
+          "label": "Podcast / video creator sync",
+          "price": 275,
+          "currency": "USD",
+          "checkoutUrl": "https://buy.stripe.com/example-river-podcast",
+          "status": "available"
+        },
+        {
+          "scope": "brand-campaign-sync",
+          "label": "Brand campaign sync",
+          "price": 1800,
+          "currency": "USD",
+          "checkoutUrl": "",
+          "status": "manual-approval"
+        }
+      ]
+    },
+    {
+      "id": "neon-orchard",
+      "title": "Neon Orchard",
+      "artist": "Nova Wells",
+      "isrc": "QZ-ABC-26-00125",
+      "masterOwner": "Nova Wells LLC",
+      "compositionOwner": "Nova Wells Publishing",
+      "primaryMarket": "Indie game loop",
+      "aiPolicy": "no-training",
+      "blockedUses": ["AI training", "voice cloning"],
+      "scopes": [
+        {
+          "scope": "indie-game-app-loop",
+          "label": "Indie game / app loop",
+          "price": 650,
+          "currency": "USD",
+          "checkoutUrl": "https://buy.stripe.com/example-neon-game",
+          "status": "available"
+        },
+        {
+          "scope": "ai-exclusion",
+          "label": "AI exclusion / no-training declaration",
+          "price": 0,
+          "currency": "USD",
+          "checkoutUrl": "",
+          "status": "blocked"
+        }
+      ]
+    }
+  ]
+}

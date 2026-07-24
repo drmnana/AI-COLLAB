@@ -60,6 +60,39 @@ const defaultState = {
   }
 };
 
+const defaultScopes = {
+  "AI training opt-in license": [
+    { scope: "ai-training", label: "AI training opt-in", priceMultiplier: 6, status: "manual-approval" }
+  ],
+  "AI generation / soundtrack-on-demand": [
+    { scope: "ai-generation-soundtrack", label: "AI generation / soundtrack-on-demand", priceMultiplier: 5, status: "manual-approval" }
+  ],
+  "AI exclusion / no-training declaration": [
+    { scope: "ai-exclusion", label: "AI exclusion / no-training declaration", priceMultiplier: 0, status: "blocked" }
+  ],
+  "Podcast intro/outro": [
+    { scope: "podcast-video-sync", label: "Podcast / video creator sync", priceMultiplier: 1, status: "available" }
+  ],
+  "Indie game loop": [
+    { scope: "indie-game-app-loop", label: "Indie game / app loop", priceMultiplier: 1, status: "available" }
+  ],
+  "Local business / fitness / event public use": [
+    { scope: "local-business-fitness-event", label: "Local business / fitness / event public use", priceMultiplier: 1, status: "available" }
+  ],
+  "Fitness studio playlist": [
+    { scope: "local-business-fitness-event", label: "Local business / fitness / event public use", priceMultiplier: 1, status: "available" }
+  ],
+  "Short-form creator pack": [
+    { scope: "short-form-creator", label: "Short-form creator sync", priceMultiplier: 1, status: "available" }
+  ],
+  "Brand campaign sync": [
+    { scope: "brand-campaign-sync", label: "Brand campaign sync", priceMultiplier: 4, status: "manual-approval" }
+  ],
+  "Remix / stem-use license": [
+    { scope: "remix-stem-use", label: "Remix / stem-use license", priceMultiplier: 2, status: "manual-approval" }
+  ]
+};
+
 const campaigns = [
   {
     title: "Fan Ownership Pass",
@@ -325,6 +358,57 @@ function setupForms() {
     link.click();
     URL.revokeObjectURL(url);
   });
+
+  document.getElementById("exportCatalog").addEventListener("click", () => {
+    downloadJson("catalog.json", createCatalogSource());
+  });
+}
+
+function createCatalogSource() {
+  return {
+    schemaVersion: "0.1",
+    updatedAt: new Date().toISOString(),
+    splits: appState.splits.map((split) => ({
+      id: split.id,
+      name: split.name,
+      role: split.role,
+      percent: Number(split.percent)
+    })),
+    songs: appState.catalog.map((song) => ({
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      isrc: song.isrc,
+      masterOwner: song.masterOwner,
+      compositionOwner: song.compositionOwner,
+      primaryMarket: song.market,
+      aiPolicy: song.aiPolicy,
+      blockedUses: song.blockedUses,
+      scopes: createScopesForSong(song)
+    }))
+  };
+}
+
+function createScopesForSong(song) {
+  const templates = defaultScopes[song.market] || defaultScopes["Podcast intro/outro"];
+  return templates.map((template) => ({
+    scope: template.scope,
+    label: template.label,
+    price: Math.round(Number(song.price || 0) * template.priceMultiplier),
+    currency: "USD",
+    checkoutUrl: "",
+    status: template.status
+  }));
+}
+
+function downloadJson(filename, payload) {
+  const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 function hydrateInputs() {

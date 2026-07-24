@@ -16,6 +16,7 @@
       <div class="top-actions">
         <button id="seedDemo" type="button">Load Demo</button>
         <button id="exportPlan" type="button">Export Plan</button>
+        <button id="exportCatalog" type="button">Export Catalog</button>
       </div>
     </header>
 
@@ -200,6 +201,32 @@
           </form>
           <div id="splitList" class="list" aria-live="polite"></div>
         </article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Public manifest protocol</p>
+            <h2>Publish song rights as static JSON.</h2>
+          </div>
+        </div>
+        <div class="protocol-grid">
+          <article>
+            <span>Catalog index</span>
+            <strong>/catalog/index.json</strong>
+            <p>Lists every public song manifest generated during build.</p>
+          </article>
+          <article>
+            <span>Per-song manifest</span>
+            <strong>/catalog/&lt;song-id&gt;.manifest.json</strong>
+            <p>Exposes identity, owners, scopes, prices, checkout URLs, AI policy, blocked uses, and split percentages.</p>
+          </article>
+          <article>
+            <span>Static v1 workflow</span>
+            <strong>Export catalog.json</strong>
+            <p>Edit locally, export the canonical catalog source, commit it, then rebuild to publish fresh manifests.</p>
+          </article>
+        </div>
       </section>
 
       <section class="panel">

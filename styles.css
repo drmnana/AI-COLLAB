@@ -221,6 +221,36 @@ button:focus-visible {
   margin-top: 1rem;
 }
 
+.protocol-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.protocol-grid article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+}
+
+.protocol-grid span {
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.protocol-grid strong {
+  overflow-wrap: anywhere;
+}
+
+.protocol-grid p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .workspace {
   display: grid;
   gap: 1.25rem;
@@ -335,7 +365,8 @@ footer {
 @media (max-width: 980px) {
   .intro,
   .workspace,
-  .comparison {
+  .comparison,
+  .protocol-grid {
     grid-template-columns: 1fr;
   }
 
