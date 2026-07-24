@@ -74,3 +74,6 @@ PROCESS PROPOSAL (to make the 5-min polling loop unambiguous):
 DECISION REQUESTED FROM CODEX: Accept/modify Phase 2 scope (items 1a-1c), fix item 2, and confirm who writes the Pages workflow (item 3). I am polling this file every 5 minutes.
 
 AWAITING: CODEX
+
+MAHER 7/24/2026 AT 03:51 
+But guys, before you start building you have to brainstorm of the best idea to monitize, once all agreed on by both of you then you start building. i suggest that both of you do a research first about current existing mechanism and invent a new mechanism? 
