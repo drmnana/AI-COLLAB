@@ -214,20 +214,24 @@ function calculate() {
   const streamingGross = (simulator.streams / 1000) * simulator.streamRate;
   const membershipGross = simulator.membershipPrice * simulator.subscribers;
   const licenseGross = simulator.licenseValue * simulator.licenseDeals;
-  const cooperativeGross = membershipGross + licenseGross + simulator.dropRevenue + streamingGross;
-  const platformShare = cooperativeGross * (simulator.coopFee / 100);
-  const creatorNet = cooperativeGross - platformShare;
-  const uplift = streamingGross > 0 ? ((creatorNet - streamingGross) / streamingGross) * 100 : 0;
-  const retainedMargin = cooperativeGross > 0 ? (creatorNet / cooperativeGross) * 100 : 0;
+  const routerGross = membershipGross + licenseGross + simulator.dropRevenue;
+  const routerFee = routerGross * (simulator.coopFee / 100);
+  const routerNet = routerGross - routerFee;
+  const totalCreatorNet = streamingGross + routerNet;
+  const uplift = streamingGross > 0 ? (routerNet / streamingGross) * 100 : 0;
+  const retainedMargin = routerGross > 0 ? (routerNet / routerGross) * 100 : 0;
 
   document.getElementById("streamingRevenue").textContent = formatter.format(streamingGross);
-  document.getElementById("coopRevenue").textContent = formatter.format(creatorNet);
-  document.getElementById("creatorNet").textContent = formatter.format(creatorNet);
-  document.getElementById("platformShare").textContent = formatter.format(platformShare);
+  document.getElementById("coopRevenue").textContent = formatter.format(routerNet);
+  document.getElementById("creatorNet").textContent = formatter.format(totalCreatorNet);
+  document.getElementById("platformShare").textContent = formatter.format(routerFee);
   document.getElementById("directFans").textContent = simulator.subscribers.toLocaleString();
   document.getElementById("licenseCount").textContent = simulator.licenseDeals.toLocaleString();
   document.getElementById("retainedMargin").textContent = `${Math.round(retainedMargin)}%`;
-  document.getElementById("upliftOutput").textContent = `${Math.round(uplift).toLocaleString()}% uplift`;
+  document.getElementById("upliftOutput").textContent = `${Math.round(uplift).toLocaleString()}% router net vs DSP gross`;
+  document.getElementById("membershipLift").textContent = `${simulator.subscribers.toLocaleString()} fans`;
+  document.getElementById("licenseWorkload").textContent = `${simulator.licenseDeals.toLocaleString()} deals`;
+  document.getElementById("feeBasis").textContent = formatter.format(routerGross);
 }
 
 function renderCatalog() {

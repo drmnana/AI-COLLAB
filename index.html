@@ -91,23 +91,40 @@
             <input id="dropRevenue" type="number" min="0" step="25" value="2400">
           </label>
           <label>
-            Cooperative fee %
+            Router fee %
             <input id="coopFee" type="number" min="0" max="50" step="1" value="12">
           </label>
         </div>
 
         <div class="comparison">
           <article>
-            <span>Streaming-only creator revenue</span>
+            <span>DSP streaming gross</span>
             <strong id="streamingRevenue">$0</strong>
           </article>
           <article>
-            <span>Creator cooperative revenue</span>
+            <span>Router-managed creator net</span>
             <strong id="coopRevenue">$0</strong>
           </article>
           <article>
-            <span>Artist retained margin</span>
+            <span>Router retained margin</span>
             <strong id="retainedMargin">0%</strong>
+          </article>
+        </div>
+        <div class="assumption-grid">
+          <article>
+            <span>Membership lift</span>
+            <strong id="membershipLift">0 fans</strong>
+            <p>Requires consistent fan conversion from discovery channels.</p>
+          </article>
+          <article>
+            <span>License workload</span>
+            <strong id="licenseWorkload">0 deals</strong>
+            <p>Requires catalog prep, terms, checkout links, and follow-up.</p>
+          </article>
+          <article>
+            <span>Fee basis</span>
+            <strong id="feeBasis">$0</strong>
+            <p>Router fee applies only to direct revenue, not DSP streaming gross.</p>
           </article>
         </div>
       </section>

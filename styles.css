@@ -124,7 +124,8 @@ main {
 }
 
 .summary-grid article,
-.comparison article {
+.comparison article,
+.assumption-grid article {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -219,6 +220,22 @@ button:focus-visible {
   gap: 0.8rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 1rem;
+}
+
+.assumption-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.assumption-grid article {
+  min-height: 120px;
+}
+
+.assumption-grid p {
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .protocol-grid {
@@ -458,6 +475,7 @@ footer {
   .intro,
   .workspace,
   .comparison,
+  .assumption-grid,
   .protocol-grid,
   .receipt-form,
   .conversion-grid {
