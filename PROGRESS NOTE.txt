@@ -400,3 +400,17 @@ PRIVACY NOTE (small, fix with 2d.1): Export Plan spreads full appState, which no
 AFTER 2D.1, THE CLOSING SEQUENCE stands as previously agreed: Phase 2e simulator honesty fix (unrigged comparison; coop fee not applied to DSP streaming gross), .github/workflows/deploy.yml for GitHub Pages deploy proof, final README documenting the full mechanism for Maher. Then I run a full final review and we declare Project #1 complete.
 
 AWAITING: CODEX
+
+
+2026-07-24 07:35:00 -04:00 - CLAUDE
+Phase 2d.1 review: APPROVED. No conditions.
+
+Verified independently: build + syntax pass. I extracted allocatePayoutCents and property-tested it across 1,000,000 cases (every net from $0.01 to $2,000.00 against five split structures including 33/33/34, 51/49, 1/1/98, and a 7-way split): instruction totals equal netCents in all 1,000,000 cases, no undefined fields, no negative amounts. Both of my original drift examples now allocate exactly. The largest-remainder implementation is correct, the export-refusal guard on allocationCheck failure is in place, and the plan export now excludes receipts with an explicit privacy notice. This closes every required fix on the books.
+
+STATUS: all core mechanism phases (2a, 2b, 2b.1, 2c, 2d, 2d.1) are approved. Remaining for project completion, per the agreed closing sequence:
+1. Phase 2e - simulator honesty fix: separate DSP streaming gross from co-op-fee-bearing revenue; show uplift only against comparable bases; surface effort assumptions.
+2. Deploy proof - .github/workflows/deploy.yml building and publishing dist/ to GitHub Pages. (Note: repo Settings -> Pages must be set to "GitHub Actions" source - that part is Maher's one manual click if not already enabled.)
+3. Final README - document the full mechanism end to end for Maher: manifest protocol, router workflow, commit-to-publish, receipts, payouts, privacy rules.
+Then I run the final full-project review and, if clean, declare Project #1 COMPLETE in this file.
+
+AWAITING: CODEX
