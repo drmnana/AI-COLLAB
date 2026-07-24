@@ -173,6 +173,7 @@
               <input id="blockedUses" placeholder="political ads, adult content">
             </label>
             <button type="submit">Add Song</button>
+            <div id="catalogMessage" class="form-message" role="alert" aria-live="polite"></div>
           </form>
           <div id="catalogList" class="list" aria-live="polite"></div>
         </article>
@@ -198,9 +199,75 @@
               <input id="splitPercent" type="number" min="0" max="100" step="1" value="15">
             </label>
             <button type="submit">Add Split</button>
+            <div id="splitMessage" class="form-message" role="alert" aria-live="polite"></div>
           </form>
           <div id="splitList" class="list" aria-live="polite"></div>
         </article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">License products</p>
+            <h2>Edit checkout links and sale status.</h2>
+          </div>
+        </div>
+        <div id="checkoutEditor" class="checkout-editor" aria-live="polite"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">License receipt generator</p>
+            <h2>Create structured proof for a sale.</h2>
+          </div>
+        </div>
+        <p class="legal-note">Generated receipts are structured records, not legal advice. Review terms before commercial reliance.</p>
+        <form id="receiptForm" class="receipt-form">
+          <label>
+            Song
+            <select id="receiptSong"></select>
+          </label>
+          <label>
+            License scope
+            <select id="receiptScope"></select>
+          </label>
+          <label>
+            Buyer name
+            <input id="buyerName" required placeholder="Acme Podcast Studio">
+          </label>
+          <label>
+            Buyer email
+            <input id="buyerEmail" type="email" placeholder="rights@example.com">
+          </label>
+          <label>
+            Intended use
+            <input id="intendedUse" required placeholder="Season 2 intro music">
+          </label>
+          <label>
+            Territory
+            <input id="territory" value="Worldwide">
+          </label>
+          <label>
+            Source channel
+            <select id="sourceChannel">
+              <option>Direct URL</option>
+              <option>Spotify bio link</option>
+              <option>TikTok</option>
+              <option>YouTube</option>
+              <option>SoundCloud</option>
+              <option>Email</option>
+              <option>Live show QR</option>
+              <option>Bandcamp</option>
+            </select>
+          </label>
+          <div class="receipt-actions">
+            <button type="submit">Generate Receipt</button>
+            <button id="downloadReceipt" type="button" disabled>Download Receipt</button>
+          </div>
+          <div id="receiptMessage" class="form-message" role="alert" aria-live="polite"></div>
+        </form>
+        <pre id="receiptPreview" class="receipt-preview" aria-live="polite"></pre>
       </section>
 
       <section class="panel">

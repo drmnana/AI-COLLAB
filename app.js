@@ -133,6 +133,7 @@ function getState() {
 }
 
 let appState = getState();
+let lastReceipt = null;
 
 function normalizeState(state) {
   const base = structuredClone(defaultState);
@@ -152,12 +153,26 @@ function normalizeSong(song) {
     isrc: String(song.isrc || "").trim(),
     masterOwner: String(song.masterOwner || song.artist || "Unassigned master owner").trim(),
     compositionOwner: String(song.compositionOwner || song.artist || "Unassigned composition owner").trim(),
-    market: String(song.market || "Podcast intro/outro").trim(),
+    market: String(song.market || song.primaryMarket || "Podcast intro/outro").trim(),
     price: Number(song.price) || 0,
     aiPolicy: song.aiPolicy || inferAiPolicy(song.market),
     blockedUses: Array.isArray(song.blockedUses) ? song.blockedUses : parseList(song.blockedUses || ""),
+    scopes: normalizeScopes(song.scopes, song),
+    splits: Array.isArray(song.splits) ? song.splits.map(normalizeSplit) : null,
     createdAt: song.createdAt || new Date().toISOString()
   };
+}
+
+function normalizeScopes(scopes, song) {
+  const source = Array.isArray(scopes) && scopes.length > 0 ? scopes : createScopesForSong(song);
+  return source.map((scope) => ({
+    scope: scope.scope,
+    label: scope.label,
+    price: Number(scope.price) || 0,
+    currency: scope.currency || "USD",
+    checkoutUrl: scope.checkoutUrl || "",
+    status: scope.status || "manual-approval"
+  }));
 }
 
 function normalizeSplit(split) {
@@ -232,10 +247,16 @@ function renderCatalog() {
     item.querySelector("button").addEventListener("click", () => {
       appState.catalog.splice(index, 1);
       saveState();
-      renderCatalog();
+      renderWorkspace();
     });
     list.appendChild(item);
   });
+}
+
+function renderWorkspace() {
+  renderCatalog();
+  renderCheckoutEditor();
+  populateReceiptSelectors();
 }
 
 function renderSplits() {
@@ -282,6 +303,57 @@ function renderCampaigns() {
   `).join("");
 }
 
+function renderCheckoutEditor() {
+  const container = document.getElementById("checkoutEditor");
+  container.innerHTML = "";
+  appState.catalog.forEach((song) => {
+    const article = document.createElement("article");
+    article.className = "checkout-song";
+    article.innerHTML = `
+      <h3>${escapeHtml(song.title)} <small>${escapeHtml(song.artist)}</small></h3>
+      <div></div>
+    `;
+    const scopeList = article.querySelector("div");
+    song.scopes.forEach((scope, scopeIndex) => {
+      const row = document.createElement("div");
+      row.className = "checkout-scope";
+      row.innerHTML = `
+        <label>
+          Product
+          <input value="${escapeHtml(scope.label)}" data-field="label">
+        </label>
+        <label>
+          Price
+          <input type="number" min="0" step="25" value="${scope.price}" data-field="price">
+        </label>
+        <label>
+          Status
+          <select data-field="status">
+            <option value="available">Available</option>
+            <option value="manual-approval">Manual approval</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </label>
+        <label>
+          Checkout URL
+          <input value="${escapeHtml(scope.checkoutUrl)}" data-field="checkoutUrl" placeholder="https://buy.stripe.com/...">
+        </label>
+      `;
+      row.querySelector("select").value = scope.status;
+      row.querySelectorAll("input, select").forEach((input) => {
+        input.addEventListener("input", () => {
+          const field = input.dataset.field;
+          song.scopes[scopeIndex][field] = field === "price" ? Number(input.value) || 0 : input.value.trim();
+          saveState();
+          populateReceiptSelectors();
+        });
+      });
+      scopeList.appendChild(row);
+    });
+    container.appendChild(article);
+  });
+}
+
 function setupForms() {
   document.querySelectorAll(".simulator-grid input").forEach((input) => {
     input.addEventListener("input", calculate);
@@ -289,13 +361,17 @@ function setupForms() {
 
   document.getElementById("catalogForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    setMessage("catalogMessage", "");
     const title = document.getElementById("songTitle").value.trim();
     const artist = document.getElementById("songArtist").value.trim();
     const masterOwner = document.getElementById("masterOwner").value.trim();
     const compositionOwner = document.getElementById("compositionOwner").value.trim();
-    if (!title || !artist || !masterOwner || !compositionOwner) return;
+    if (!title || !artist || !masterOwner || !compositionOwner) {
+      setMessage("catalogMessage", "Add song title, artist, master owner, and composition owner.");
+      return;
+    }
 
-    appState.catalog.push({
+    const song = {
       id: uniqueSongId(title),
       title,
       artist,
@@ -306,20 +382,28 @@ function setupForms() {
       price: numberValue("songPrice"),
       aiPolicy: document.getElementById("aiPolicy").value,
       blockedUses: parseList(document.getElementById("blockedUses").value),
+      splits: appState.splits.map((split) => ({ ...split })),
       createdAt: new Date().toISOString()
-    });
+    };
+    song.scopes = createScopesForSong(song);
+    appState.catalog.push(song);
     event.target.reset();
     document.getElementById("songPrice").value = 350;
     saveState();
-    renderCatalog();
+    renderWorkspace();
+    setMessage("catalogMessage", "Song added to rights registry.", true);
   });
 
   document.getElementById("splitForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    setMessage("splitMessage", "");
     const name = document.getElementById("splitName").value.trim();
     const role = document.getElementById("splitRole").value.trim();
     const percent = clampPercent(numberValue("splitPercent"));
-    if (!name || !role || percent <= 0) return;
+    if (!name || !role || percent <= 0) {
+      setMessage("splitMessage", "Add collaborator, role, and a split greater than 0%.");
+      return;
+    }
 
     appState.splits.push({
       id: uniqueSplitId(name),
@@ -331,13 +415,14 @@ function setupForms() {
     document.getElementById("splitPercent").value = 15;
     saveState();
     renderSplits();
+    setMessage("splitMessage", "Split added.", true);
   });
 
   document.getElementById("seedDemo").addEventListener("click", () => {
     appState = structuredClone(defaultState);
     saveState();
     hydrateInputs();
-    renderCatalog();
+    renderWorkspace();
     renderSplits();
     calculate();
   });
@@ -351,17 +436,27 @@ function setupForms() {
       },
       exportedAt: new Date().toISOString()
     }, null, 2);
-    const blob = new Blob([payload], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "music-monetization-plan.json";
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadJson("music-monetization-plan.json", JSON.parse(payload));
   });
 
   document.getElementById("exportCatalog").addEventListener("click", () => {
     downloadJson("catalog.json", createCatalogSource());
+  });
+
+  document.getElementById("receiptSong").addEventListener("change", populateReceiptScopes);
+  document.getElementById("receiptForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    setMessage("receiptMessage", "");
+    const receipt = createReceipt();
+    if (!receipt) return;
+    lastReceipt = receipt;
+    document.getElementById("receiptPreview").textContent = JSON.stringify(receipt, null, 2);
+    document.getElementById("downloadReceipt").disabled = false;
+    setMessage("receiptMessage", "Receipt generated.", true);
+  });
+
+  document.getElementById("downloadReceipt").addEventListener("click", () => {
+    if (lastReceipt) downloadJson(`${lastReceipt.receiptId}.json`, lastReceipt);
   });
 }
 
@@ -385,19 +480,100 @@ function createCatalogSource() {
       primaryMarket: song.market,
       aiPolicy: song.aiPolicy,
       blockedUses: song.blockedUses,
-      splits: appState.splits.map((split) => ({
-        id: split.id,
-        name: split.name,
-        role: split.role,
-        percent: Number(split.percent)
-      })),
-      scopes: createScopesForSong(song)
+      splits: getResolvedSplits(song),
+      scopes: song.scopes
     }))
   };
 }
 
+function populateReceiptSelectors() {
+  const songSelect = document.getElementById("receiptSong");
+  const selected = songSelect.value;
+  songSelect.innerHTML = appState.catalog.map((song) => (
+    `<option value="${escapeHtml(song.id)}">${escapeHtml(song.title)} - ${escapeHtml(song.artist)}</option>`
+  )).join("");
+  if (appState.catalog.some((song) => song.id === selected)) songSelect.value = selected;
+  populateReceiptScopes();
+}
+
+function populateReceiptScopes() {
+  const song = getSelectedReceiptSong();
+  const scopeSelect = document.getElementById("receiptScope");
+  if (!song) {
+    scopeSelect.innerHTML = "";
+    return;
+  }
+  const selected = scopeSelect.value;
+  scopeSelect.innerHTML = song.scopes.map((scope) => (
+    `<option value="${escapeHtml(scope.scope)}">${escapeHtml(scope.label)} - ${formatter.format(scope.price)}</option>`
+  )).join("");
+  if (song.scopes.some((scope) => scope.scope === selected)) scopeSelect.value = selected;
+}
+
+function createReceipt() {
+  const song = getSelectedReceiptSong();
+  const scope = song?.scopes.find((item) => item.scope === document.getElementById("receiptScope").value);
+  const buyerName = document.getElementById("buyerName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
+  if (!song || !scope || !buyerName || !intendedUse) {
+    setMessage("receiptMessage", "Choose a song and license, then add buyer name and intended use.");
+    return null;
+  }
+  if (scope.status === "blocked") {
+    setMessage("receiptMessage", "This scope is blocked and cannot generate a sale receipt.");
+    return null;
+  }
+  const issuedAt = new Date().toISOString();
+  return {
+    receiptVersion: "0.1",
+    receiptId: `license-receipt-${song.id}-${scope.scope}-${Date.now()}`,
+    issuedAt,
+    legalNotice: "Structured license record only. Not legal advice; review terms before commercial reliance.",
+    song: {
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      isrc: song.isrc,
+      masterOwner: song.masterOwner,
+      compositionOwner: song.compositionOwner
+    },
+    license: {
+      scope: scope.scope,
+      label: scope.label,
+      price: Number(scope.price),
+      currency: scope.currency,
+      checkoutUrl: scope.checkoutUrl,
+      status: scope.status,
+      intendedUse,
+      territory: document.getElementById("territory").value.trim() || "Worldwide",
+      aiPolicy: song.aiPolicy,
+      blockedUses: song.blockedUses
+    },
+    buyer: {
+      name: buyerName,
+      email: document.getElementById("buyerEmail").value.trim()
+    },
+    conversion: {
+      sourceChannel: document.getElementById("sourceChannel").value
+    },
+    splits: getResolvedSplits(song).map((split) => ({
+      id: split.id,
+      role: split.role,
+      percent: Number(split.percent)
+    }))
+  };
+}
+
+function getResolvedSplits(song) {
+  return Array.isArray(song.splits) && song.splits.length > 0 ? song.splits : appState.splits;
+}
+
+function getSelectedReceiptSong() {
+  return appState.catalog.find((song) => song.id === document.getElementById("receiptSong").value);
+}
+
 function createScopesForSong(song) {
-  const templates = defaultScopes[song.market] || defaultScopes["Podcast intro/outro"];
+  const templates = defaultScopes[song.market || song.primaryMarket] || defaultScopes["Podcast intro/outro"];
   return templates.map((template) => ({
     scope: template.scope,
     label: template.label,
@@ -416,6 +592,12 @@ function downloadJson(filename, payload) {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function setMessage(id, message, success = false) {
+  const element = document.getElementById(id);
+  element.textContent = message;
+  element.classList.toggle("is-success", success);
 }
 
 function hydrateInputs() {
@@ -493,6 +675,8 @@ saveState();
 hydrateInputs();
 setupForms();
 renderCatalog();
+renderCheckoutEditor();
+populateReceiptSelectors();
 renderSplits();
 renderCampaigns();
 calculate();

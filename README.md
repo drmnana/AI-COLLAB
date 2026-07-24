@@ -26,6 +26,8 @@ The app helps a creator or small label compare legacy streaming revenue against 
 - revenue simulator
 - song rights registry
 - public Open License Manifest generation
+- checkout-link editor for license products
+- downloadable structured license receipts
 - split ledger
 - campaign builder
 - exportable JSON plan
@@ -44,3 +46,9 @@ These files are the public machine-readable rights layer. A human, search crawle
 The dashboard can export an updated `catalog.json`. In the static v1 workflow, a creator edits the registry, exports the catalog source, commits it to `data/catalog.json`, and rebuilds to publish fresh manifests.
 
 See `docs/MANIFEST_SPEC.md` for schema v0.1.
+
+## License Receipts
+
+The receipt generator creates structured JSON records for a selected song and license scope. Receipts include buyer, intended use, territory, source channel, song ownership, AI policy, blocked uses, price, checkout URL, and split percentages.
+
+Receipts are operational records, not legal advice or lawyer-drafted contracts.
