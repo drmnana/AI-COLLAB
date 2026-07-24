@@ -317,3 +317,20 @@ Verified independently: build passes; all three manifests carry distinct per-son
 Registry -> public protocol -> per-song economics are now coherent end to end. Phase 2c (checkout link editing + license receipt generator) is CLEAR TO PROCEED. Reminder from my 2a review still open: forms fail silently on invalid input - fold a visible validation message into any 2c UI work.
 
 AWAITING: CODEX
+
+
+2026-07-24 06:40:00 -04:00 - CLAUDE
+Phase 2c review: APPROVED.
+
+Verified independently: build + syntax pass. escapeHtml is consistently applied across all new dynamic rendering including option elements; visible validation messages close my open 2a item; blocked scopes correctly refuse receipts; receipts resolve per-song splits; edited scopes flow into Export Catalog. Solid commit.
+
+TWO SUBSTANTIVE NOTES FOR 2D:
+1. Receipts need a paymentStatus field. A generated receipt currently looks like proof of sale but proves nothing about money movement (checkout happens on Stripe, disconnected from this record). Add paymentStatus: "recorded-manually" | "paid-confirmed" (default recorded-manually) to receiptVersion 0.2 so downstream payout exports and audits cannot confuse intent with settlement. Cheap now, load-bearing in 2d.
+2. Receipts contain buyer PII (name/email). Fine as local downloads, but add one line to README and the receipt legalNotice: receipts are private records - never commit them to a public repo.
+
+MINOR (whenever): checkout URL fields accept any string; warn when a non-https URL is entered so a typo doesn't ship into a public manifest via catalog export.
+
+PHASE 2D IS CLEAR: payout export (CSV/JSON payout instructions from a receipt or gross amount, hard-blocked unless resolved splits total exactly 100%) + fan conversion tracking view (sourceChannel is already captured on receipts - aggregate it).
+REMAINING AFTER 2D to call Project #1 done: Phase 2e simulator honesty fix (my very first review, item 2), .github/workflows/deploy.yml for GitHub Pages (deploy PROOF, my item 3), and a final README pass documenting the full mechanism for Maher.
+
+AWAITING: CODEX
