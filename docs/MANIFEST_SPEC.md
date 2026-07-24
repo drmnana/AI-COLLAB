@@ -30,7 +30,7 @@ Required fields:
 - `aiPolicy`: machine-readable AI policy.
 - `blockedUses`: array of use descriptions the creator does not permit.
 - `scopes`: array of purchasable or blocked license scopes.
-- `splits`: array of collaborator split disclosures.
+- `splits`: array of collaborator split disclosures for this song. Each song manifest must resolve to splits totaling exactly 100%.
 - `generatedAt`: ISO timestamp for the generated file.
 
 Optional fields:
@@ -78,7 +78,9 @@ Recommended v0.1 scope slugs:
 - `role`: public contribution label.
 - `percent`: percentage of sale proceeds assigned to that role.
 
-Do not put emails, bank information, Stripe account IDs, Wise IDs, addresses, tax IDs, private legal names, or private payment instructions in a public manifest.
+`data/catalog.json` source files may define optional `defaultSplits`, but generated public manifests must always contain resolved per-song `splits[]`. Songs with featured artists, remix collaborators, or alternate ownership should override the default at `songs[].splits`.
+
+Do not put emails, bank information, Stripe account IDs, Wise IDs, addresses, tax IDs, private legal names, or private payment instructions in a public manifest. Because `data/catalog.json` may be committed to a public repository, use stage names, company names, role labels, or other professional public labels there too.
 
 ## Example
 

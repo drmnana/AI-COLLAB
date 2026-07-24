@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "updatedAt": "2026-07-24T09:34:16.000Z",
-  "splits": [
+  "defaultSplits": [
     {
       "id": "lead-artist",
       "name": "Lead artist",
@@ -32,6 +32,26 @@
       "primaryMarket": "Short-form creator pack",
       "aiPolicy": "opt-in-priced",
       "blockedUses": ["political ads", "hate content"],
+      "splits": [
+        {
+          "id": "lead-artist",
+          "name": "Lead artist",
+          "role": "Composition and master",
+          "percent": 65
+        },
+        {
+          "id": "producer",
+          "name": "Producer",
+          "role": "Beat and arrangement",
+          "percent": 20
+        },
+        {
+          "id": "mixer",
+          "name": "Mixer",
+          "role": "Mix engineering",
+          "percent": 15
+        }
+      ],
       "scopes": [
         {
           "scope": "short-form-creator",
@@ -61,6 +81,26 @@
       "primaryMarket": "Podcast intro/outro",
       "aiPolicy": "manual-approval",
       "blockedUses": ["political ads"],
+      "splits": [
+        {
+          "id": "lead-artist",
+          "name": "Lead artist",
+          "role": "Composition and master",
+          "percent": 70
+        },
+        {
+          "id": "producer",
+          "name": "Producer",
+          "role": "Beat and arrangement",
+          "percent": 15
+        },
+        {
+          "id": "guest-vocalist",
+          "name": "Guest vocalist",
+          "role": "Featured vocal",
+          "percent": 15
+        }
+      ],
       "scopes": [
         {
           "scope": "podcast-video-sync",
@@ -90,6 +130,20 @@
       "primaryMarket": "Indie game loop",
       "aiPolicy": "no-training",
       "blockedUses": ["AI training", "voice cloning"],
+      "splits": [
+        {
+          "id": "lead-artist",
+          "name": "Lead artist",
+          "role": "Composition and master",
+          "percent": 80
+        },
+        {
+          "id": "sound-designer",
+          "name": "Sound designer",
+          "role": "Interactive loop edit",
+          "percent": 20
+        }
+      ],
       "scopes": [
         {
           "scope": "indie-game-app-loop",

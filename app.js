@@ -172,6 +172,7 @@ function normalizeSplit(split) {
 
 function saveState() {
   localStorage.setItem(stateKey, JSON.stringify(appState));
+  localStorage.removeItem(legacyStateKey);
 }
 
 function numberValue(id) {
@@ -368,7 +369,7 @@ function createCatalogSource() {
   return {
     schemaVersion: "0.1",
     updatedAt: new Date().toISOString(),
-    splits: appState.splits.map((split) => ({
+    defaultSplits: appState.splits.map((split) => ({
       id: split.id,
       name: split.name,
       role: split.role,
@@ -384,6 +385,12 @@ function createCatalogSource() {
       primaryMarket: song.market,
       aiPolicy: song.aiPolicy,
       blockedUses: song.blockedUses,
+      splits: appState.splits.map((split) => ({
+        id: split.id,
+        name: split.name,
+        role: split.role,
+        percent: Number(split.percent)
+      })),
       scopes: createScopesForSong(song)
     }))
   };

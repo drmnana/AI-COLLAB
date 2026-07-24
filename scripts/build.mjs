@@ -6,6 +6,8 @@ const root = process.cwd();
 const dist = path.join(root, "dist");
 const catalogSource = path.join(root, "data", "catalog.json");
 const required = ["index.html", "styles.css", "app.js"];
+const aiPolicies = new Set(["opt-in-priced", "manual-approval", "no-training"]);
+const scopeStatuses = new Set(["available", "manual-approval", "blocked"]);
 
 for (const file of required) {
   if (!existsSync(path.join(root, file))) {
@@ -37,21 +39,44 @@ function validateCatalog(catalog) {
   if (!Array.isArray(catalog.songs) || catalog.songs.length === 0) {
     throw new Error("data/catalog.json must include songs[]");
   }
-  if (!Array.isArray(catalog.splits) || catalog.splits.length === 0) {
-    throw new Error("data/catalog.json must include splits[]");
-  }
-  const splitTotal = catalog.splits.reduce((sum, split) => sum + Number(split.percent || 0), 0);
-  if (splitTotal !== 100) {
-    throw new Error(`catalog splits must total 100%, received ${splitTotal}%`);
+  if (catalog.defaultSplits !== undefined) {
+    validateSplits(catalog.defaultSplits, "defaultSplits");
   }
   for (const song of catalog.songs) {
     for (const field of ["id", "title", "artist", "masterOwner", "compositionOwner", "aiPolicy"]) {
       if (!song[field]) throw new Error(`song is missing ${field}`);
     }
+    if (!aiPolicies.has(song.aiPolicy)) {
+      throw new Error(`${song.id} has invalid aiPolicy: ${song.aiPolicy}`);
+    }
     if (!Array.isArray(song.scopes) || song.scopes.length === 0) {
       throw new Error(`${song.id} must include scopes[]`);
     }
+    for (const scope of song.scopes) {
+      if (!scopeStatuses.has(scope.status)) {
+        throw new Error(`${song.id} has invalid scope status: ${scope.status}`);
+      }
+    }
+    resolveSongSplits(catalog, song);
   }
+}
+
+function validateSplits(splits, label) {
+  if (!Array.isArray(splits) || splits.length === 0) {
+    throw new Error(`${label} must include at least one split`);
+  }
+  const splitTotal = splits.reduce((sum, split) => sum + Number(split.percent || 0), 0);
+  if (splitTotal !== 100) {
+    throw new Error(`${label} must total 100%, received ${splitTotal}%`);
+  }
+}
+
+function resolveSongSplits(catalog, song) {
+  const splits = Array.isArray(song.splits) && song.splits.length > 0
+    ? song.splits
+    : catalog.defaultSplits;
+  validateSplits(splits, `${song.id} splits`);
+  return splits;
 }
 
 async function writeCatalogManifests(catalog) {
@@ -96,7 +121,7 @@ async function writeCatalogManifests(catalog) {
         checkoutUrl: scope.checkoutUrl || "",
         status: scope.status || "manual-approval"
       })),
-      splits: catalog.splits.map((split) => ({
+      splits: resolveSongSplits(catalog, song).map((split) => ({
         id: split.id,
         role: split.role,
         percent: Number(split.percent)

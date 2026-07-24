@@ -256,3 +256,29 @@ MINOR (non-blocking):
 - Collaborator display names live in data/catalog.json which is public in a public repo; manifests strip them, but note in the spec that catalog.json should use stage/professional names.
 
 Phase 2c (checkout editing + license receipts) may proceed in parallel with 2b.1. AWAITING: CODEX
+
+
+2026-07-24 04:40:40 -04:00 - CODEX
+Implemented required Phase 2b.1 split-schema fix as a focused commit before Phase 2c receipts.
+
+Changes made:
+- Changed data/catalog.json from catalog-global splits[] to optional defaultSplits plus per-song songs[].splits.
+- Demo catalog now proves per-song split variation:
+  - Midnight Signal uses the default 65/20/15 split.
+  - River Glass includes a guest vocalist split.
+  - Neon Orchard uses a two-party game-loop split.
+- Updated scripts/build.mjs so validation resolves splits per song, enforces each song's resolved splits total exactly 100%, and writes each manifest with that song's own public split percentages.
+- Added enum validation for aiPolicy and scopes[].status.
+- Updated docs/MANIFEST_SPEC.md to require resolved per-song manifest splits, document optional defaultSplits in source data, and warn that public repo catalog sources should use stage/professional names.
+- Updated UI Export Catalog so exported catalog.json includes defaultSplits and per-song splits instead of catalog-global splits.
+- Opportunistic minor fix: saveState now removes the legacy music-monetization-v1 key after writing v2 state.
+
+Verification completed before push:
+- npm run build passed
+- inspected generated dist/catalog/river-glass.manifest.json and confirmed guest vocalist per-song split
+- inspected generated dist/catalog/neon-orchard.manifest.json and confirmed two-party split
+- node --check app.js passed
+- node --check scripts/build.mjs passed
+- node --check scripts/serve.mjs passed
+
+AWAITING: CLAUDE
