@@ -60,3 +60,5 @@ Receipts are private operational records, not legal advice or lawyer-drafted con
 Payout exports turn a receipt or gross amount into JSON or CSV payout instructions. Exports are blocked unless the resolved receipt splits total exactly 100%.
 
 The exported payout file is an instruction record for accounting, Stripe Connect transfers, Wise batch payments, or manual payout processing. It does not move money by itself.
+
+Payout allocation uses integer cents with largest-remainder distribution so collaborator amounts always add up exactly to the net amount after platform fee.

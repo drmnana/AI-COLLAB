@@ -440,11 +440,14 @@ function setupForms() {
 
   document.getElementById("exportPlan").addEventListener("click", () => {
     const payload = JSON.stringify({
-      ...appState,
+      catalog: appState.catalog,
+      splits: appState.splits,
+      simulator: appState.simulator,
       splitStatus: {
         totalPercent: getSplitTotal(),
         payoutExportReady: getSplitTotal() === 100
       },
+      privacyNotice: "Private receipts are excluded from this general plan export. Download receipts separately and do not commit buyer details to a public repository.",
       exportedAt: new Date().toISOString()
     }, null, 2);
     downloadJson("music-monetization-plan.json", JSON.parse(payload));
@@ -638,27 +641,66 @@ function createPayoutInstructions() {
     setMessage("payoutMessage", "Enter a gross amount greater than 0.");
     return null;
   }
-  const platformFeeAmount = roundMoney(grossAmount * (platformFeePercent / 100));
-  const netAmount = roundMoney(grossAmount - platformFeeAmount);
+  const grossCents = moneyToCents(grossAmount);
+  const platformFeeCents = Math.round(grossCents * (platformFeePercent / 100));
+  const netCents = grossCents - platformFeeCents;
+  const instructions = allocatePayoutCents(receipt.splits, netCents, receipt.license.currency);
+  const instructionsTotal = roundMoney(instructions.reduce((sum, item) => sum + item.amount, 0));
+  const netAmount = centsToMoney(netCents);
+  if (instructionsTotal !== netAmount) {
+    setMessage("payoutMessage", "Payout export blocked: allocation check failed.");
+    return null;
+  }
   return {
-    payoutVersion: "0.1",
+    payoutVersion: "0.2",
     payoutId: `payout-${receipt.receiptId}`,
     generatedAt: new Date().toISOString(),
     receiptId: receipt.receiptId,
     paymentStatus: receipt.paymentStatus,
-    grossAmount,
+    grossAmount: centsToMoney(grossCents),
     currency: receipt.license.currency,
     platformFeePercent,
-    platformFeeAmount,
+    platformFeeAmount: centsToMoney(platformFeeCents),
     netAmount,
-    instructions: receipt.splits.map((split) => ({
+    instructions,
+    allocationCheck: {
+      instructionsTotal,
+      equalsNet: instructionsTotal === netAmount
+    }
+  };
+}
+
+function allocatePayoutCents(splits, netCents, currency) {
+  const allocations = splits.map((split, index) => {
+    const exactShare = netCents * (Number(split.percent) / 100);
+    const floorCents = Math.floor(exactShare);
+    return {
       collaboratorId: split.id,
       role: split.role,
       percent: Number(split.percent),
-      amount: roundMoney(netAmount * (Number(split.percent) / 100)),
-      currency: receipt.license.currency
-    }))
-  };
+      cents: floorCents,
+      remainder: exactShare - floorCents,
+      index,
+      currency
+    };
+  });
+  let remainingCents = netCents - allocations.reduce((sum, item) => sum + item.cents, 0);
+  [...allocations]
+    .sort((a, b) => b.remainder - a.remainder || a.index - b.index)
+    .forEach((allocation) => {
+      if (remainingCents <= 0) return;
+      allocation.cents += 1;
+      remainingCents -= 1;
+    });
+  return allocations
+    .sort((a, b) => a.index - b.index)
+    .map(({ collaboratorId, role, percent, cents, currency }) => ({
+      collaboratorId,
+      role,
+      percent,
+      amount: centsToMoney(cents),
+      currency
+    }));
 }
 
 function getSelectedPayoutReceipt() {
@@ -690,6 +732,14 @@ function csvCell(value) {
 
 function roundMoney(value) {
   return Math.round(value * 100) / 100;
+}
+
+function moneyToCents(value) {
+  return Math.round(Number(value) * 100);
+}
+
+function centsToMoney(cents) {
+  return cents / 100;
 }
 
 function getSelectedReceiptSong() {
