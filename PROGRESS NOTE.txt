@@ -35,3 +35,42 @@ Implementation started in repo with:
 - scripts/build.mjs
 - scripts/serve.mjs
 - README.md
+
+
+2026-07-24 07:55:00 -04:00 - CLAUDE
+Accepted the supervising AI role. Reviewed the plan, the code, and verified the build.
+
+VERIFICATION (all pass):
+- npm run build -> dist/ produced correctly
+- npm start -> serves 200 on / and /app.js
+- app.js passes node --check; no framework deps as promised
+
+WHAT I AGREE WITH:
+- Static, dependency-free MVP as Phase 1 is the right call. Cheap to deploy, easy to review.
+- Streaming-as-discovery framing is correct. The revenue stack (memberships, micro-licensing, drops, splits) is the right set of pillars.
+- Code quality is solid: XSS escaping present, localStorage schema fallback, accessible labels/aria-live.
+
+WHAT I PUSH BACK ON (in order of importance):
+
+1. THIS IS A CALCULATOR, NOT A MONETIZATION SYSTEM. The user's brief says "build a code software to MANAGE this task" and "I want a FINISHED project." A simulator plans revenue; it does not collect a dollar. Phase 1 is acceptable scaffolding, but we are not done until money can actually move. Proposed Phase 2 scope (keep static frontend, add serverless):
+   a. Micro-license storefront: per-song license products with scoped terms (podcast/game/AI-training/brand), checkout via Stripe Payment Links (zero backend code to start), license PDF/JSON receipt generated per sale.
+   b. Split payout engine: take the split ledger + gross revenue, output exact payout instructions (CSV/JSON compatible with Stripe Connect transfers or Wise batch payments). This is the "transparent splits" pillar made real.
+   c. Membership tiers: start with Stripe Payment Links for tiers too; gate content later.
+   This keeps the "realistic to deploy" constraint: static site + payment links = deployable today with no servers.
+
+2. THE SIMULATOR'S COMPARISON IS RIGGED. "Cooperative revenue" = streaming + memberships + licenses + drops vs "streaming-only" = streaming. More revenue streams will always beat one; the uplift % is marketing math, not insight. Fix: (a) show effort/cost assumptions per stream (memberships require fan count, licensing requires catalog prep), (b) don't apply the coop fee to streaming gross - DSP payouts don't route through the co-op, so the current model overstates platform share and understates creator net.
+
+3. MISSING DEPLOY PROOF. README claims GitHub Pages deployability - prove it. Add .github/workflows/deploy.yml publishing dist/ to Pages. That converts a claim into a URL the user can click. I can write this if you want.
+
+4. MINOR CODE ISSUES (non-blocking):
+   - splits can total >100% and the UI only warns; block payout export (Phase 2) on total != 100
+   - catalogForm: required passes on whitespace; validate post-trim
+   - getState() shallow-merges saved state; a future schema change to nested objects will half-merge. Version the key or deep-merge.
+
+PROCESS PROPOSAL (to make the 5-min polling loop unambiguous):
+- Every entry ends with a handoff line: "AWAITING: CODEX" or "AWAITING: CLAUDE" or "AWAITING: USER".
+- Whoever is named acts; the other stays idle. Prevents both AIs editing simultaneously.
+
+DECISION REQUESTED FROM CODEX: Accept/modify Phase 2 scope (items 1a-1c), fix item 2, and confirm who writes the Pages workflow (item 3). I am polling this file every 5 minutes.
+
+AWAITING: CODEX
