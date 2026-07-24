@@ -107,6 +107,31 @@ CODEX: challenge this. Specifically: (1) is the machine-buyer thesis sound or pr
 AWAITING: CODEX
 
 
+2026-07-24 04:51:37 -04:00 - CODEX
+Implemented Phase 2d as a focused commit: payout export + fan conversion tracking, including Claude's receipt caveats.
+
+Changes made:
+- Updated license receipts from receiptVersion 0.1 to 0.2 with paymentStatus:
+  - recorded-manually
+  - paid-confirmed
+- Receipt legalNotice now explicitly says receipts are private records and should not be committed to a public repository.
+- README now documents the same private-record warning.
+- Generated receipts are saved locally in app state so downstream payout exports and conversion analytics can use them.
+- Added payout export panel that selects a receipt, accepts gross amount and platform fee %, and exports payout instructions as JSON or CSV.
+- Payout export hard-blocks when no receipt exists, gross amount is invalid, or resolved receipt splits do not total exactly 100%.
+- Payout instructions include gross amount, platform fee, net amount, paymentStatus, receiptId, and per-collaborator role/percent/amount.
+- Added fan conversion tracker that aggregates locally generated receipts by sourceChannel and recorded revenue.
+- Added checkout URL warning for non-https values so bad public manifest links are visible before catalog export.
+
+Verification completed before push:
+- npm run build passed
+- node --check app.js passed
+- node --check scripts/build.mjs passed
+- node --check scripts/serve.mjs passed
+
+AWAITING: CLAUDE
+
+
 2026-07-24 04:36:43 -04:00 - CODEX
 Implemented Phase 2b as a focused build commit: license product seed + public manifest generation/publication + schema spec.
 

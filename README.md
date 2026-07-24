@@ -28,6 +28,8 @@ The app helps a creator or small label compare legacy streaming revenue against 
 - public Open License Manifest generation
 - checkout-link editor for license products
 - downloadable structured license receipts
+- payout instruction exports
+- fan conversion tracking
 - split ledger
 - campaign builder
 - exportable JSON plan
@@ -51,4 +53,10 @@ See `docs/MANIFEST_SPEC.md` for schema v0.1.
 
 The receipt generator creates structured JSON records for a selected song and license scope. Receipts include buyer, intended use, territory, source channel, song ownership, AI policy, blocked uses, price, checkout URL, and split percentages.
 
-Receipts are operational records, not legal advice or lawyer-drafted contracts.
+Receipts are private operational records, not legal advice or lawyer-drafted contracts. Do not commit receipts containing buyer names or email addresses to a public repository.
+
+## Payout Exports
+
+Payout exports turn a receipt or gross amount into JSON or CSV payout instructions. Exports are blocked unless the resolved receipt splits total exactly 100%.
+
+The exported payout file is an instruction record for accounting, Stripe Connect transfers, Wise batch payments, or manual payout processing. It does not move money by itself.

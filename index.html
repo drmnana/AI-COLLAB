@@ -261,6 +261,13 @@
               <option>Bandcamp</option>
             </select>
           </label>
+          <label>
+            Payment status
+            <select id="paymentStatus">
+              <option value="recorded-manually">Recorded manually</option>
+              <option value="paid-confirmed">Paid confirmed</option>
+            </select>
+          </label>
           <div class="receipt-actions">
             <button type="submit">Generate Receipt</button>
             <button id="downloadReceipt" type="button" disabled>Download Receipt</button>
@@ -268,6 +275,45 @@
           <div id="receiptMessage" class="form-message" role="alert" aria-live="polite"></div>
         </form>
         <pre id="receiptPreview" class="receipt-preview" aria-live="polite"></pre>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Payout export</p>
+            <h2>Turn receipts into split instructions.</h2>
+          </div>
+        </div>
+        <form id="payoutForm" class="receipt-form">
+          <label>
+            Receipt
+            <select id="payoutReceipt"></select>
+          </label>
+          <label>
+            Gross amount
+            <input id="payoutGross" type="number" min="0" step="0.01" value="0">
+          </label>
+          <label>
+            Platform fee %
+            <input id="payoutFee" type="number" min="0" max="30" step="0.5" value="7">
+          </label>
+          <div class="receipt-actions">
+            <button id="exportPayoutJson" type="button">Export JSON</button>
+            <button id="exportPayoutCsv" type="button">Export CSV</button>
+          </div>
+          <div id="payoutMessage" class="form-message" role="alert" aria-live="polite"></div>
+        </form>
+        <pre id="payoutPreview" class="receipt-preview" aria-live="polite"></pre>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Fan conversion tracker</p>
+            <h2>See which channels create license demand.</h2>
+          </div>
+        </div>
+        <div id="conversionTracker" class="conversion-grid" aria-live="polite"></div>
       </section>
 
       <section class="panel">

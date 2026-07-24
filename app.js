@@ -57,7 +57,8 @@ const defaultState = {
     licenseDeals: 12,
     dropRevenue: 2400,
     coopFee: 12
-  }
+  },
+  receipts: []
 };
 
 const defaultScopes = {
@@ -140,7 +141,8 @@ function normalizeState(state) {
   return {
     catalog: Array.isArray(state.catalog) ? state.catalog.map(normalizeSong) : base.catalog,
     splits: Array.isArray(state.splits) ? state.splits.map(normalizeSplit) : base.splits,
-    simulator: { ...base.simulator, ...(state.simulator || {}) }
+    simulator: { ...base.simulator, ...(state.simulator || {}) },
+    receipts: Array.isArray(state.receipts) ? state.receipts : base.receipts
   };
 }
 
@@ -338,12 +340,15 @@ function renderCheckoutEditor() {
           Checkout URL
           <input value="${escapeHtml(scope.checkoutUrl)}" data-field="checkoutUrl" placeholder="https://buy.stripe.com/...">
         </label>
+        <div class="form-message" data-warning></div>
       `;
       row.querySelector("select").value = scope.status;
+      updateCheckoutWarning(row, scope.checkoutUrl);
       row.querySelectorAll("input, select").forEach((input) => {
         input.addEventListener("input", () => {
           const field = input.dataset.field;
           song.scopes[scopeIndex][field] = field === "price" ? Number(input.value) || 0 : input.value.trim();
+          if (field === "checkoutUrl") updateCheckoutWarning(row, song.scopes[scopeIndex].checkoutUrl);
           saveState();
           populateReceiptSelectors();
         });
@@ -352,6 +357,12 @@ function renderCheckoutEditor() {
     });
     container.appendChild(article);
   });
+}
+
+function updateCheckoutWarning(row, checkoutUrl) {
+  const warning = row.querySelector("[data-warning]");
+  const value = String(checkoutUrl || "").trim();
+  warning.textContent = value && !value.startsWith("https://") ? "Use an https checkout URL before publishing." : "";
 }
 
 function setupForms() {
@@ -450,14 +461,22 @@ function setupForms() {
     const receipt = createReceipt();
     if (!receipt) return;
     lastReceipt = receipt;
+    appState.receipts.unshift(receipt);
+    saveState();
     document.getElementById("receiptPreview").textContent = JSON.stringify(receipt, null, 2);
     document.getElementById("downloadReceipt").disabled = false;
+    populatePayoutReceipts();
+    renderConversionTracker();
     setMessage("receiptMessage", "Receipt generated.", true);
   });
 
   document.getElementById("downloadReceipt").addEventListener("click", () => {
     if (lastReceipt) downloadJson(`${lastReceipt.receiptId}.json`, lastReceipt);
   });
+
+  document.getElementById("payoutReceipt").addEventListener("change", hydratePayoutAmount);
+  document.getElementById("exportPayoutJson").addEventListener("click", () => exportPayout("json"));
+  document.getElementById("exportPayoutCsv").addEventListener("click", () => exportPayout("csv"));
 }
 
 function createCatalogSource() {
@@ -525,10 +544,11 @@ function createReceipt() {
   }
   const issuedAt = new Date().toISOString();
   return {
-    receiptVersion: "0.1",
+    receiptVersion: "0.2",
     receiptId: `license-receipt-${song.id}-${scope.scope}-${Date.now()}`,
     issuedAt,
-    legalNotice: "Structured license record only. Not legal advice; review terms before commercial reliance.",
+    paymentStatus: document.getElementById("paymentStatus").value,
+    legalNotice: "Structured private license record only. Not legal advice; review terms before commercial reliance. Do not commit receipts containing buyer details to a public repository.",
     song: {
       id: song.id,
       title: song.title,
@@ -556,16 +576,120 @@ function createReceipt() {
     conversion: {
       sourceChannel: document.getElementById("sourceChannel").value
     },
-    splits: getResolvedSplits(song).map((split) => ({
-      id: split.id,
-      role: split.role,
-      percent: Number(split.percent)
-    }))
+    splits: getPublicSplits(song)
   };
 }
 
 function getResolvedSplits(song) {
   return Array.isArray(song.splits) && song.splits.length > 0 ? song.splits : appState.splits;
+}
+
+function getPublicSplits(song) {
+  return getResolvedSplits(song).map((split) => ({
+    id: split.id,
+    role: split.role,
+    percent: Number(split.percent)
+  }));
+}
+
+function populatePayoutReceipts() {
+  const select = document.getElementById("payoutReceipt");
+  const selected = select.value;
+  select.innerHTML = appState.receipts.map((receipt) => (
+    `<option value="${escapeHtml(receipt.receiptId)}">${escapeHtml(receipt.song.title)} - ${escapeHtml(receipt.license.label)} - ${escapeHtml(receipt.paymentStatus)}</option>`
+  )).join("");
+  if (appState.receipts.some((receipt) => receipt.receiptId === selected)) select.value = selected;
+  hydratePayoutAmount();
+}
+
+function hydratePayoutAmount() {
+  const receipt = getSelectedPayoutReceipt();
+  const input = document.getElementById("payoutGross");
+  if (receipt) input.value = receipt.license.price;
+}
+
+function exportPayout(format) {
+  setMessage("payoutMessage", "");
+  const payout = createPayoutInstructions();
+  if (!payout) return;
+  document.getElementById("payoutPreview").textContent = format === "csv" ? payoutToCsv(payout) : JSON.stringify(payout, null, 2);
+  if (format === "csv") {
+    downloadText(`${payout.payoutId}.csv`, payoutToCsv(payout), "text/csv");
+  } else {
+    downloadJson(`${payout.payoutId}.json`, payout);
+  }
+  setMessage("payoutMessage", "Payout instructions exported.", true);
+}
+
+function createPayoutInstructions() {
+  const receipt = getSelectedPayoutReceipt();
+  if (!receipt) {
+    setMessage("payoutMessage", "Generate or select a receipt first.");
+    return null;
+  }
+  const grossAmount = numberValue("payoutGross");
+  const platformFeePercent = numberValue("payoutFee");
+  const splitTotal = receipt.splits.reduce((sum, split) => sum + Number(split.percent), 0);
+  if (splitTotal !== 100) {
+    setMessage("payoutMessage", `Payout export blocked: resolved splits total ${splitTotal}%, not 100%.`);
+    return null;
+  }
+  if (grossAmount <= 0) {
+    setMessage("payoutMessage", "Enter a gross amount greater than 0.");
+    return null;
+  }
+  const platformFeeAmount = roundMoney(grossAmount * (platformFeePercent / 100));
+  const netAmount = roundMoney(grossAmount - platformFeeAmount);
+  return {
+    payoutVersion: "0.1",
+    payoutId: `payout-${receipt.receiptId}`,
+    generatedAt: new Date().toISOString(),
+    receiptId: receipt.receiptId,
+    paymentStatus: receipt.paymentStatus,
+    grossAmount,
+    currency: receipt.license.currency,
+    platformFeePercent,
+    platformFeeAmount,
+    netAmount,
+    instructions: receipt.splits.map((split) => ({
+      collaboratorId: split.id,
+      role: split.role,
+      percent: Number(split.percent),
+      amount: roundMoney(netAmount * (Number(split.percent) / 100)),
+      currency: receipt.license.currency
+    }))
+  };
+}
+
+function getSelectedPayoutReceipt() {
+  return appState.receipts.find((receipt) => receipt.receiptId === document.getElementById("payoutReceipt").value);
+}
+
+function payoutToCsv(payout) {
+  const rows = [
+    ["payoutId", "receiptId", "paymentStatus", "collaboratorId", "role", "percent", "amount", "currency"]
+  ];
+  payout.instructions.forEach((instruction) => {
+    rows.push([
+      payout.payoutId,
+      payout.receiptId,
+      payout.paymentStatus,
+      instruction.collaboratorId,
+      instruction.role,
+      instruction.percent,
+      instruction.amount,
+      instruction.currency
+    ]);
+  });
+  return rows.map((row) => row.map(csvCell).join(",")).join("\n");
+}
+
+function csvCell(value) {
+  return `"${String(value).replace(/"/g, '""')}"`;
+}
+
+function roundMoney(value) {
+  return Math.round(value * 100) / 100;
 }
 
 function getSelectedReceiptSong() {
@@ -585,13 +709,40 @@ function createScopesForSong(song) {
 }
 
 function downloadJson(filename, payload) {
-  const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], { type: "application/json" });
+  downloadText(filename, `${JSON.stringify(payload, null, 2)}\n`, "application/json");
+}
+
+function downloadText(filename, content, type) {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function renderConversionTracker() {
+  const container = document.getElementById("conversionTracker");
+  const totals = new Map();
+  appState.receipts.forEach((receipt) => {
+    const channel = receipt.conversion?.sourceChannel || "Unknown";
+    const current = totals.get(channel) || { count: 0, revenue: 0 };
+    current.count += 1;
+    current.revenue += Number(receipt.license?.price || 0);
+    totals.set(channel, current);
+  });
+  if (totals.size === 0) {
+    container.innerHTML = `<article class="conversion-card"><span>No receipts yet</span><strong>0</strong><p>Generate receipts to see source-channel demand.</p></article>`;
+    return;
+  }
+  container.innerHTML = Array.from(totals.entries()).map(([channel, total]) => `
+    <article class="conversion-card">
+      <span>${escapeHtml(channel)}</span>
+      <strong>${total.count}</strong>
+      <p>${formatter.format(total.revenue)} recorded</p>
+    </article>
+  `).join("");
 }
 
 function setMessage(id, message, success = false) {
@@ -677,6 +828,8 @@ setupForms();
 renderCatalog();
 renderCheckoutEditor();
 populateReceiptSelectors();
+populatePayoutReceipts();
+renderConversionTracker();
 renderSplits();
 renderCampaigns();
 calculate();
