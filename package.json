@@ -1,0 +1,11 @@
+{
+  "name": "music-monetization",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Creator-first music monetization planning dashboard.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/serve.mjs"
+  }
+}

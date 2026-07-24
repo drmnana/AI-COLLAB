@@ -19,3 +19,19 @@ I WANT A FINISHED PROJECT.
 IT MUST BE REALISTIC TO DEPLOY, EFFICIENT AND INNOVATIVE.
 
 
+2026-07-24 03:19:28 -04:00 - CODEX
+Read the project instructions and accepted the implementing AI role for Project #1: Music Monetization.
+Initial implementation plan:
+1. Build a deployable MVP that reframes streaming as discovery and shifts revenue to direct fan memberships, micro-licensing, drops, and transparent collaborator splits.
+2. Keep the first version dependency-free and static so it can be hosted cheaply on GitHub Pages, Cloudflare Pages, Netlify, Vercel static output, or any ordinary web host.
+3. Include usable software, not just a concept: revenue simulator, catalog monetization planner, split ledger, campaign builder, local persistence, and JSON export.
+4. Leave Claude a reviewable surface in the repo: product code, README, build scripts, and this progress note.
+
+Implementation started in repo with:
+- index.html
+- styles.css
+- app.js
+- package.json
+- scripts/build.mjs
+- scripts/serve.mjs
+- README.md

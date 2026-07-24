@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Creator-first music monetization dashboard and simulator.">
+    <title>Music Monetization</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Project #1</p>
+        <h1>Music Monetization</h1>
+      </div>
+      <div class="top-actions">
+        <button id="seedDemo" type="button">Load Demo</button>
+        <button id="exportPlan" type="button">Export Plan</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Creator-first revenue engine</p>
+          <h2>Move the profit center from platforms back to artists.</h2>
+          <p>
+            Model a realistic mix of direct memberships, catalog licenses, drops,
+            and transparent collaborator splits. The goal is not to eliminate
+            streaming; it is to make streaming the discovery layer instead of the
+            primary paycheck.
+          </p>
+        </div>
+        <div class="summary-grid" aria-label="Projected monthly performance">
+          <article>
+            <span>Creator Net</span>
+            <strong id="creatorNet">$0</strong>
+          </article>
+          <article>
+            <span>Platform Share</span>
+            <strong id="platformShare">$0</strong>
+          </article>
+          <article>
+            <span>Direct Fans</span>
+            <strong id="directFans">0</strong>
+          </article>
+          <article>
+            <span>Catalog Licenses</span>
+            <strong id="licenseCount">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Revenue simulator</p>
+            <h2>Compare streaming-only vs creator cooperative.</h2>
+          </div>
+          <output id="upliftOutput" for="streams membershipPrice subscribers licenseValue licenseDeals dropRevenue">0% uplift</output>
+        </div>
+
+        <div class="simulator-grid">
+          <label>
+            Monthly streams
+            <input id="streams" type="number" min="0" value="250000">
+          </label>
+          <label>
+            Streaming payout per 1,000
+            <input id="streamRate" type="number" min="0" step="0.01" value="3.20">
+          </label>
+          <label>
+            Fan membership price
+            <input id="membershipPrice" type="number" min="0" step="0.50" value="8">
+          </label>
+          <label>
+            Paying direct fans
+            <input id="subscribers" type="number" min="0" value="850">
+          </label>
+          <label>
+            Average license value
+            <input id="licenseValue" type="number" min="0" step="25" value="425">
+          </label>
+          <label>
+            Monthly license deals
+            <input id="licenseDeals" type="number" min="0" value="12">
+          </label>
+          <label>
+            Monthly drop revenue
+            <input id="dropRevenue" type="number" min="0" step="25" value="2400">
+          </label>
+          <label>
+            Cooperative fee %
+            <input id="coopFee" type="number" min="0" max="50" step="1" value="12">
+          </label>
+        </div>
+
+        <div class="comparison">
+          <article>
+            <span>Streaming-only creator revenue</span>
+            <strong id="streamingRevenue">$0</strong>
+          </article>
+          <article>
+            <span>Creator cooperative revenue</span>
+            <strong id="coopRevenue">$0</strong>
+          </article>
+          <article>
+            <span>Artist retained margin</span>
+            <strong id="retainedMargin">0%</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <article class="panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Catalog planner</p>
+              <h2>Package songs for higher-value uses.</h2>
+            </div>
+          </div>
+          <form id="catalogForm" class="stacked-form">
+            <label>
+              Song title
+              <input id="songTitle" required placeholder="Midnight Signal">
+            </label>
+            <label>
+              Best market
+              <select id="songMarket">
+                <option>AI training opt-in license</option>
+                <option>Podcast intro/outro</option>
+                <option>Indie game loop</option>
+                <option>Fitness studio playlist</option>
+                <option>Short-form creator pack</option>
+                <option>Brand campaign sync</option>
+              </select>
+            </label>
+            <label>
+              Target price
+              <input id="songPrice" type="number" min="0" step="25" value="350">
+            </label>
+            <button type="submit">Add Song</button>
+          </form>
+          <div id="catalogList" class="list" aria-live="polite"></div>
+        </article>
+
+        <article class="panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Split ledger</p>
+              <h2>Keep royalties explainable.</h2>
+            </div>
+          </div>
+          <form id="splitForm" class="stacked-form">
+            <label>
+              Collaborator
+              <input id="splitName" required placeholder="Producer">
+            </label>
+            <label>
+              Role
+              <input id="splitRole" required placeholder="Beat, mix, topline">
+            </label>
+            <label>
+              Split %
+              <input id="splitPercent" type="number" min="0" max="100" step="1" value="15">
+            </label>
+            <button type="submit">Add Split</button>
+          </form>
+          <div id="splitList" class="list" aria-live="polite"></div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Campaign builder</p>
+            <h2>Turn listeners into owners, members, and license buyers.</h2>
+          </div>
+        </div>
+        <div class="campaigns" id="campaigns"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built for AI collaboration: Codex implements, Claude reviews, progress is tracked in the repository note.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
